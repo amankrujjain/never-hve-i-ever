@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "never-have-i-ever",
+    "name": "Never Have I Ever",
     "slug": "never-have-i-ever",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.aman.neverhaveiever",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cd14a626-610d-4d2b-9be6-525436005863"
+      }
     }
   }
 }

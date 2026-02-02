@@ -1,24 +1,37 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import { SoundProvider } from "../context/SoundContext";
+import { GameProvider } from "../context/GameContext";
+import { useEffect } from "react";
+import {
+  Audio,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
+import { MusicProvider } from "../context/MusicContext";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+export default function Layout() {
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+      shouldDuckAndroid: false,
+      staysActiveInBackground: false,
+    });
+  }, []);
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+return (
+    <SoundProvider>
+      <MusicProvider>
+        <GameProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+        </GameProvider>
+      </MusicProvider>
+    </SoundProvider>
   );
 }
