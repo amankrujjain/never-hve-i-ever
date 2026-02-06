@@ -8,17 +8,9 @@ import {
   InterruptionModeIOS,
 } from "expo-av";
 import { MusicProvider } from "../context/MusicContext";
-import { Platform } from "react-native";
-import * as NavigationBar from "expo-navigation-bar";
 
 
 export default function Layout() {
-  useEffect(() => {
-  if (Platform.OS === "android") {
-    NavigationBar.setBackgroundColorAsync("#000000");
-    NavigationBar.setButtonStyleAsync("light");
-  }
-}, []);
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
