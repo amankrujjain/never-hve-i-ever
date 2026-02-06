@@ -4,63 +4,96 @@ import {
   StyleSheet,
   FlatList,
   ImageBackground,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { SoundPressable } from "../components/SoundPressable";
-import { useSound } from "../context/SoundContext";
 import { AppHeader } from "../components/AppHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppMenu } from "@/components/AppMenu";
+import { ExitGameModal } from "../components/ExitGameModal";
 
+import {
+  canShowRatingPrompt,
+  recordRatingPromptShown,
+} from "../services/rating-service";
 
 const CATEGORIES = [
   {
     key: "party",
-    label: "🎉 Party",
-    image: require("../assets/categories/party.png"),
+    image: require("../assets/categories/party.webp"),
     type: "preset",
     ratio: 1.5,
   },
   {
     key: "fun",
-    label: "😂 Fun",
-    image: require("../assets/categories/fun.png"),
+    image: require("../assets/categories/fun.webp"),
     type: "preset",
     ratio: 1.5,
   },
   {
     key: "spicy",
-    label: "🌶 Spicy",
-    image: require("../assets/categories/spicy.png"),
+    image: require("../assets/categories/spicy.webp"),
     type: "preset",
     ratio: 1.5,
   },
   {
     key: "adult",
-    label: "🧑‍🤝‍🧑 Adult",
-    image: require("../assets/categories/adult.png"),
+    image: require("../assets/categories/adult.webp"),
     type: "preset",
     ratio: 1.5,
   },
   {
     key: "custom",
-    label: "➕ Custom",
-    image: require("../assets/categories/custom.png"),
+    image: require("../assets/categories/custom.webp"),
     type: "custom",
     ratio: 1.78,
   },
 ];
 
-
 export default function CategoriesScreen() {
   const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showExit, setShowExit] = useState(false);
+
+  /**
+   * 🔙 ANDROID BACK HANDLER
+   */
+  useEffect(() => {
+    const onBackPress = () => {
+      // If modal already open → close it
+      if (showExit) {
+        setShowExit(false);
+        return true;
+      }
+
+      canShowRatingPrompt().then((canShow) => {
+        if (!canShow) {
+          BackHandler.exitApp();
+          return;
+        }
+
+        recordRatingPromptShown().then(() => {
+          setShowExit(true);
+        });
+      });
+
+      return true;
+    };
+
+    const sub = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => sub.remove();
+  }, [showExit]);
 
   const onPressCategory = (cat: (typeof CATEGORIES)[number]) => {
     if (cat.type === "custom") {
-      router.push({ pathname: "/custom-category" });
+      router.push("/custom-category");
     } else {
       router.push({
         pathname: "/game",
@@ -74,24 +107,8 @@ export default function CategoriesScreen() {
       colors={["#fdbd11", "#fdbd11"]}
       style={styles.container}
     >
-      <AppHeader onMenuPress={() => setMenuOpen(true)} />
-      <AppMenu
-        visible={menuOpen}
-        onClose={() => setMenuOpen(false)}
-      />
-
-
-      {/* 🔙 Back */}
-      {/* <SoundPressable onPress={() => router.back()} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
-      </SoundPressable>
-
-      {/* 🔊 Sound */}
-      {/* <SoundPressable onPress={toggle} style={styles.soundBtn}>
-        <Text style={styles.soundIcon}>
-          {enabled ? "🔊" : "🔇"}
-        </Text>
-      </SoundPressable>  */}
+      <AppHeader showBack={false} onMenuPress={() => setMenuOpen(true)} />
+      <AppMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <Text style={styles.title}>Choose Category</Text>
 
@@ -110,11 +127,15 @@ export default function CategoriesScreen() {
               source={item.image}
               style={styles.image}
               imageStyle={styles.imageRadius}
-            >
-              {/* <Text style={styles.cardText}>{item.label}</Text> */}
-            </ImageBackground>
+            />
           </SoundPressable>
         )}
+      />
+
+      <ExitGameModal
+        visible={showExit}
+        onCancel={() => setShowExit(false)}
+        onExit={() => BackHandler.exitApp()}
       />
     </LinearGradient>
   );
@@ -125,23 +146,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 120,
     paddingHorizontal: 20,
-  },
-  backBtn: {
-    position: "absolute",
-    top: 45,
-    left: 20,
-  },
-  backText: {
-    color: "#4ade80",
-    fontSize: 18,
-  },
-  soundBtn: {
-    position: "absolute",
-    top: 45,
-    right: 20,
-  },
-  soundIcon: {
-    fontSize: 22,
   },
   title: {
     fontSize: 24,
@@ -157,16 +161,9 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     width: "100%",
-  height: "100%",
-    justifyContent: "flex-end",
+    height: "100%",
   },
   imageRadius: {
     borderRadius: 18,
-  },
-  cardText: {
-    color: "#080808",
-    fontSize: 18,
-    fontWeight: "700",
-    padding: 12,
   },
 });

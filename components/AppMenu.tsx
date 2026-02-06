@@ -52,6 +52,15 @@ export function AppMenu({ visible, onClose }: Props) {
           >
             <Text style={styles.itemText}>ℹ️ About</Text>
           </SoundPressable>
+          <SoundPressable
+            style={styles.item}
+            onPress={() => {
+              onClose();
+              router.push("/privacy-policy");
+            }}
+          >
+            <Text style={styles.itemText}>📃 Privacy Policy</Text>
+          </SoundPressable>
         </Pressable>
       </Pressable>
     </Modal>
